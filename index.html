@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SignalOps — Product Intelligence Command Center</title>
+<meta name="description" content="A human-controlled product intelligence workflow for turning noisy product signals into traceable decisions.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="mark"></div>
+      <div><strong>SignalOps</strong><span>Product Intelligence</span></div>
+    </div>
+
+    <nav>
+      <button class="nav active" data-page="overview">Overview</button>
+      <button class="nav" data-page="inbox">Signal Inbox</button>
+      <button class="nav" data-page="review">Review Workbench</button>
+      <button class="nav" data-page="brief">Product Brief</button>
+    </nav>
+
+    <div class="sidebar-note">
+      <strong>Demo data</strong>
+      <span>GitHub issues are public ToolJet data. Customer feedback is synthetic.</span>
+    </div>
+  </aside>
+
+  <main>
+    <section id="overview" class="page">
+      <header class="page-head">
+        <div>
+          <span class="eyebrow">Product exercise</span>
+          <h1>What deserves product attention right now?</h1>
+          <p>A human-controlled command center for turning noisy product signals into traceable decisions.</p>
+        </div>
+        <div class="status"><span class="live"></span><span id="sourceStatus">Loading public GitHub signals…</span></div>
+      </header>
+
+      <div class="metrics">
+        <article class="metric"><span>Unresolved signals</span><strong id="mTotal">—</strong><small>GitHub + synthetic feedback</small></article>
+        <article class="metric"><span>Awaiting review</span><strong id="mReview">—</strong><small>Human decision required</small></article>
+        <article class="metric"><span>High impact</span><strong id="mHigh">—</strong><small>S1 / S2 signals</small></article>
+        <article class="metric"><span>Approved candidates</span><strong id="mApproved">—</strong><small>Saved in this browser</small></article>
+      </div>
+
+      <div class="dashboard-grid">
+        <article class="card wide">
+          <div class="card-head"><div><h2>Signals by product area</h2><p>Where product friction is clustering.</p></div></div>
+          <div id="areaBars" class="bars"></div>
+        </article>
+        <article class="card">
+          <div class="card-head"><div><h2>Source mix</h2><p>Public evidence vs demo input.</p></div></div>
+          <div id="sourceBars" class="bars"></div>
+        </article>
+      </div>
+
+      <article class="card">
+        <div class="card-head">
+          <div><h2>Top prioritized signals</h2><p>Transparent decision support, not an AI roadmap oracle.</p></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Signal</th><th>Source</th><th>Area</th><th>Severity</th><th>Priority</th><th>State</th></tr></thead>
+            <tbody id="topRows"></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="inbox" class="page hidden">
+      <header class="page-head">
+        <div><span class="eyebrow">Unified evidence</span><h1>Signal Inbox</h1><p>Search, filter and inspect product evidence without losing provenance.</p></div>
+      </header>
+
+      <div class="toolbar">
+        <input id="search" placeholder="Search signals…">
+        <select id="sourceFilter"><option value="all">All sources</option><option value="GitHub">GitHub</option><option value="Synthetic customer">Synthetic customer</option></select>
+        <select id="severityFilter"><option value="all">All severity</option><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select>
+        <select id="stateFilter"><option value="all">All states</option><option>Awaiting review</option><option>Approved</option><option>Rejected</option><option>Further discovery</option></select>
+      </div>
+
+      <article class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Signal</th><th>Source</th><th>Area</th><th>Severity</th><th>Impact</th><th>Priority</th><th>Review</th></tr></thead>
+            <tbody id="inboxRows"></tbody>
+          </table>
+        </div>
+      </article>
+      <p class="hint">Select a row to open the Review Workbench.</p>
+    </section>
+
+    <section id="review" class="page hidden">
+      <header class="page-head">
+        <div><span class="eyebrow">Human-in-the-loop</span><h1>Review Workbench</h1><p>Keep original evidence separate from interpretation and decision.</p></div>
+      </header>
+
+      <div id="reviewEmpty" class="empty">Choose a signal from the Inbox or Overview.</div>
+
+      <div id="reviewContent" class="review-grid hidden">
+        <article class="card evidence">
+          <div class="card-head"><div><h2>Original evidence</h2><p>The source is never silently rewritten.</p></div></div>
+          <dl>
+            <div><dt>Source</dt><dd id="rSource"></dd></div>
+            <div><dt>Reference</dt><dd id="rRef"></dd></div>
+            <div><dt>Created</dt><dd id="rCreated"></dd></div>
+          </dl>
+          <pre id="rRaw"></pre>
+          <div id="rLink" class="source-link"></div>
+        </article>
+
+        <article class="card review-card">
+          <div class="card-head"><div><h2>Structured interpretation</h2><p>Suggested structure. Final judgment remains human.</p></div></div>
+
+          <label>Summary<textarea id="fSummary"></textarea></label>
+          <label>Product area<select id="fArea"></select></label>
+          <label>Severity<select id="fSeverity"><option>S1</option><option>S2</option><option>S3</option><option>S4</option></select></label>
+          <label>Recommended action<textarea id="fAction"></textarea></label>
+          <label>PM notes<textarea id="fNotes"></textarea></label>
+
+          <div class="score-grid">
+            <div><strong id="sImpact"></strong><span>Impact</span></div>
+            <div><strong id="sReach"></strong><span>Reach</span></div>
+            <div><strong id="sEvidence"></strong><span>Evidence</span></div>
+            <div><strong id="sPriority"></strong><span>Priority</span></div>
+          </div>
+
+          <div class="formula">Priority = impact × severity weight + reach × 2 + evidence × 1.5</div>
+
+          <div class="actions">
+            <button data-decision="Approved">Approve candidate</button>
+            <button data-decision="Further discovery">Need discovery</button>
+            <button data-decision="Rejected">Reject</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="brief" class="page hidden">
+      <header class="page-head">
+        <div><span class="eyebrow">Product brief</span><h1>Why SignalOps exists</h1><p>A small experiment in product evidence, human judgment and AI boundaries.</p></div>
+      </header>
+
+      <article class="card prose">
+        <h2>Problem</h2>
+        <p>Product teams receive evidence from GitHub issues, customer conversations, support, feature requests and internal observations. Those signals arrive in inconsistent formats and are difficult to compare.</p>
+
+        <h2>User</h2>
+        <p>A PM working across an enterprise application platform who needs to understand what deserves attention without losing source context.</p>
+
+        <h2>Product principles</h2>
+        <ul>
+          <li>Preserve original evidence.</li>
+          <li>Make uncertainty visible.</li>
+          <li>Use AI to structure, not silently decide.</li>
+          <li>Keep prioritization transparent and challengeable.</li>
+          <li>Never fabricate customer truth.</li>
+        </ul>
+
+        <h2>What AI could do next</h2>
+        <p>Summarize long reports, suggest product areas, cluster similar issues and flag missing context. It should not invent prevalence, revenue impact or final roadmap priority.</p>
+
+        <h2>What I would validate next</h2>
+        <p>Compare AI-assisted triage against PM-labeled examples and measure whether review time falls without reducing classification quality or decision confidence.</p>
+      </article>
+    </section>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
